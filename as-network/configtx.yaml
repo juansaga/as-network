@@ -1,0 +1,237 @@
+---
+    ################################################################################
+    #   Section: Organizations
+    ################################################################################
+    Organizations:
+    
+        - &OrdererOrg
+            Name: OrdererOrg
+            ID: OrdererMSP
+            MSPDir: crypto-config/ordererOrganizations/as.com/msp
+            Policies:
+                Readers:
+                    Type: Signature 
+                    Rule: "OR('OrdererMSP.member')"
+                Writers:
+                    Type: Signature
+                    Rule: "OR('OrdererMSP.member')"
+                Admins:
+                    Type: Signature
+                    Rule: "OR('OrdererMSP.admin')"
+            OrdererEndpoints:
+                - orderer.as.com:7050
+    
+        - &Hot1
+            Name: Hot1MSP
+            ID: Hot1MSP
+            MSPDir: crypto-config/peerOrganizations/hot1.as.com/msp
+            Policies:
+                Readers:
+                    Type: Signature
+                    Rule: "OR('Hot1MSP.admin', 'Hot1MSP.peer', 'Hot1MSP.client')"
+                Writers:
+                    Type: Signature
+                    Rule: "OR('Hot1MSP.admin', 'Hot1MSP.client')"
+                Admins:
+                    Type: Signature
+                    Rule: "OR('Hot1MSP.admin')"
+                Endorsement:
+                    Type: Signature
+                    Rule: "OR('Hot1MSP.peer')"
+            AnchorPeers:
+                - Host: peer0.hot1.as.com
+                  Port: 7051
+    
+        - &Hot2
+            Name:Hot2MSP
+            ID: Hot2MSP
+            MSPDir: crypto-config/peerOrganizations/org2.as.com/msp
+            Policies:
+                Readers:
+                    Type: Signature
+                    Rule: "OR('Hot2MSP.admin', 'Hot2MSP.peer', 'Hot2MSP.client')"
+                Writers:
+                    Type: Signature
+                    Rule: "OR('Hot2MSP.admin', 'Hot2MSP.client')"
+                Admins:
+                    Type: Signature
+                    Rule: "OR('Hot2MSP.admin')"
+                Endorsement:
+                    Type: Signature
+                    Rule: "OR('Hot2MSP.peer')"
+            AnchorPeers:
+                - Host: peer0.hot2.as.com
+                  Port: 7051
+    
+        - &Hot3
+            Name: Hot3MSP
+            ID: Hot3MSP
+            MSPDir: crypto-config/peerOrganizations/org3.as.com/msp
+            Policies:
+                Readers:
+                    Type: Signature
+                    Rule: "OR('Hot3MSP.admin', 'Hot3MSP.peer', 'Hot3MSP.client')"
+                Writers:
+                    Type: Signature
+                    Rule: "OR('Hot3MSP.admin', 'Hot3MSP.client')"
+                Admins:
+                    Type: Signature
+                    Rule: "OR('Hot3MSP.admin')"
+                Endorsement:
+                    Type: Signature
+                    Rule: "OR('Hot3MSP.peer')"
+            AnchorPeers:
+                - Host: peer0.hot3.as.com
+                  Port: 7051
+    ################################################################################
+    #   SECTION: Capabilities
+    ################################################################################
+    Capabilities:
+        Channel: &ChannelCapabilities
+            V2_0: true
+    
+        Orderer: &OrdererCapabilities
+            V2_0: true
+    
+        Application: &ApplicationCapabilities
+            V2_0: true        
+    
+    ################################################################################
+    #   SECTION: Application
+    ################################################################################
+    Application: &ApplicationDefaults
+    
+        # Organizations is the list of orgs which are defined as participants on
+        # the application side of the network
+        Organizations:
+    
+        # Policies defines the set of policies at this level of the config tree
+        # For Application policies, their canonical path is
+        #   /Channel/Application/<PolicyName>
+        Policies:
+            Readers:
+                Type: ImplicitMeta
+                Rule: "ANY Readers"
+            Writers:
+                Type: ImplicitMeta
+                Rule: "ANY Writers"
+            Admins:
+                Type: ImplicitMeta
+                Rule: "MAJORITY Admins"
+            LifecycleEndorsement:
+                Type: ImplicitMeta
+                Rule: "MAJORITY Endorsement"
+            Endorsement:
+                Type: ImplicitMeta
+                Rule: "MAJORITY Endorsement"
+    
+        Capabilities:
+            <<: *ApplicationCapabilities    
+    
+    ################################################################################
+    #   SECTION: Orderer
+    ################################################################################
+    Orderer: &OrdererDefaults
+        # Orderer Type: The orderer implementation to start
+        OrdererType: solo
+    
+    #    OrdererType: etcdraft
+    
+        EtcdRaft:
+            Consenters:
+            - Host: orderer.as.com
+              Port: 7050
+              ClientTLSCert: ../organizations/ordererOrganizations/as.com/orderers/orderer.as.com/tls/server.crt
+              ServerTLSCert: ../organizations/ordererOrganizations/as.com/orderers/orderer.as.com/tls/server.crt
+    
+        Addresses:
+            - orderer.as.com:7050
+        BatchTimeout: 2s
+        BatchSize:
+            MaxMessageCount: 10
+            AbsoluteMaxBytes: 99 MB
+            PreferredMaxBytes: 512 KB
+    
+        Kafka:
+            Brokers:
+                - 127.0.0.1:9092
+        Organizations:
+    
+        Policies:
+            Readers:
+                Type: ImplicitMeta
+                Rule: "ANY Readers"
+            Writers:
+                Type: ImplicitMeta
+                Rule: "ANY Writers"
+            Admins:
+                Type: ImplicitMeta
+                Rule: "MAJORITY Admins"
+            # BlockValidation specifies what signatures must be included in the block
+            # from the orderer for the peer to validate it.
+            BlockValidation:
+                Type: ImplicitMeta
+                Rule: "ANY Writers"
+    
+    ################################################################################
+    #
+    #   CHANNEL
+    #
+    #   This section defines the values to encode into a config transaction or
+    #   genesis block for channel related parameters.
+    #
+    ################################################################################
+    Channel: &ChannelDefaults
+        # Policies defines the set of policies at this level of the config tree
+        # For Channel policies, their canonical path is
+        #   /Channel/<PolicyName>
+        Policies:
+            # Who may invoke the 'Deliver' API
+            Readers:
+                Type: ImplicitMeta
+                Rule: "ANY Readers"
+            # Who may invoke the 'Broadcast' API
+            Writers:
+                Type: ImplicitMeta
+                Rule: "ANY Writers"
+            # By default, who may modify elements at this config level
+            Admins:
+                Type: ImplicitMeta
+                Rule: "MAJORITY Admins"
+    
+        # Capabilities describes the channel level capabilities, see the
+        # dedicated Capabilities section elsewhere in this file for a full
+        # description
+        Capabilities:
+            <<: *ChannelCapabilities
+    
+    ################################################################################
+    #   Profile
+    ################################################################################
+    Profiles:
+    
+        ThreeOrgsOrdererGenesis:
+            <<: *ChannelDefaults
+            Orderer:
+                <<: *OrdererDefaults
+                Organizations:
+                    - *OrdererOrg
+                Capabilities:
+                    <<: *OrdererCapabilities
+            Consortiums:
+                SampleConsortium:
+                    Organizations:
+                        - *Hot1
+                        - *Hot2
+                        - *Hot3
+        ThreeOrgsChannel:
+            Consortium: SampleConsortium
+            <<: *ChannelDefaults
+            Application:
+                <<: *ApplicationDefaults
+                Organizations:
+                    - *Hot1
+                    - *Hot2
+                    - *Hot3
+                Capabilities:
+                    <<: *ApplicationCapabilities

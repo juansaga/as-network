@@ -18,16 +18,16 @@ configtxgen -profile ThreeOrgsOrdererGenesis -channelID system-channel -outputBl
 
 
 
-configtxgen -profile ThreeOrgsChannel -channelID marketplace -outputCreateChannelTx ./channel-artifacts/channel.tx
+configtxgen -profile ThreeOrgsChannel -channelID data -outputCreateChannelTx ./channel-artifacts/channel.tx
 
-configtxgen -profile ThreeOrgsChannel -channelID marketplace -outputAnchorPeersUpdate ./channel-artifacts/Org1MSPanchors.tx -asOrg Org1MSP
+configtxgen -profile ThreeOrgsChannel -channelID data -outputAnchorPeersUpdate ./channel-artifacts/Hot1MSPanchors.tx -asOrg Hot1MSP
 
-configtxgen -profile ThreeOrgsChannel -channelID marketplace -outputAnchorPeersUpdate ./channel-artifacts/Org2MSPanchors.tx -asOrg Org2MSP
+configtxgen -profile ThreeOrgsChannel -channelID data -outputAnchorPeersUpdate ./channel-artifacts/Hot2MSPanchors.tx -asOrg Hot2MSP
 
-configtxgen -profile ThreeOrgsChannel -channelID marketplace -outputAnchorPeersUpdate ./channel-artifacts/Org3MSPanchors.tx -asOrg Org3MSP
+configtxgen -profile ThreeOrgsChannel -channelID data -outputAnchorPeersUpdate ./channel-artifacts/Hot3MSPanchors.tx -asOrg Hot3MSP
 
 
-export CHANNEL_NAME=marketplace
+export CHANNEL_NAME=data
 
 export VERBOSE=false
 
@@ -39,52 +39,47 @@ CHANNEL_NAME=$CHANNEL_NAME docker-compose -f docker-compose-cli-couchdb.yaml up 
 
 CAMBIAR A LA TERMINAL DEL CONTENEDOR CLI
 
-export CHANNEL_NAME=marketplace
-export CHAINCODE_NAME=foodcontrol
+export CHANNEL_NAME=data
+export CHAINCODE_NAME=data
 export CHAINCODE_VERSION=1
 export CC_RUNTIME_LANGUAGE=golang
 export CC_SRC_PATH="../../../chaincode/$CHAINCODE_NAME/"
-export ORDERER_CA=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/ordererOrganizations/acme.com/orderers/orderer.acme.com/msp/tlscacerts/tlsca.acme.com-cert.pem
+export ORDERER_CA=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/ordererOrganizations/as.com/orderers/orderer.as.com/msp/tlscacerts/tlsca.as.com-cert.pem
 
 
 
-peer channel create -o orderer.acme.com:7050 -c $CHANNEL_NAME -f ./channel-artifacts/channel.tx --tls true --cafile /opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/ordererOrganizations/acme.com/orderers/orderer.acme.com/msp/tlscacerts/tlsca.acme.com-cert.pem
+peer channel create -o orderer.as.com:7050 -c $CHANNEL_NAME -f ./channel-artifacts/channel.tx --tls true --cafile /opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/ordererOrganizations/as.com/orderers/orderer.as.com/msp/tlscacerts/tlsca.as.com-cert.pem
 
-peer channel join -b marketplace.block
-
-
-
-CORE_PEER_MSPCONFIGPATH=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org2.acme.com/users/Admin@org2.acme.com/msp CORE_PEER_ADDRESS=peer0.org2.acme.com:7051 CORE_PEER_LOCALMSPID="Org2MSP" CORE_PEER_TLS_ROOTCERT_FILE=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org2.acme.com/peers/peer0.org2.acme.com/tls/ca.crt peer channel join -b marketplace.block
-
-CORE_PEER_MSPCONFIGPATH=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org3.acme.com/users/Admin@org3.acme.com/msp CORE_PEER_ADDRESS=peer0.org3.acme.com:7051 CORE_PEER_LOCALMSPID="Org3MSP" CORE_PEER_TLS_ROOTCERT_FILE=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org3.acme.com/peers/peer0.org3.acme.com/tls/ca.crt peer channel join -b marketplace.block
+peer channel join -b data.block
 
 
 
+CORE_PEER_MSPCONFIGPATH=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/hot2.as.com/users/Admin@hot2.as.com/msp CORE_PEER_ADDRESS=peer0.hot2.as.com:7051 CORE_PEER_LOCALMSPID="Hot2MSP" CORE_PEER_TLS_ROOTCERT_FILE=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/hot2.as.com/peers/peer0.hot2.as.com/tls/ca.crt peer channel join -b data.block
 
-
-peer channel update -o orderer.acme.com:7050 -c $CHANNEL_NAME -f ./channel-artifacts/Org1MSPanchors.tx --tls --cafile /opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/ordererOrganizations/acme.com/orderers/orderer.acme.com/msp/tlscacerts/tlsca.acme.com-cert.pem
+CORE_PEER_MSPCONFIGPATH=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/hot3.as.com/users/Admin@hot3.as.com/msp CORE_PEER_ADDRESS=peer0.hot3.as.com:7051 CORE_PEER_LOCALMSPID="Hot3MSP" CORE_PEER_TLS_ROOTCERT_FILE=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/hot3.as.com/peers/peer0.hot3.as.com/tls/ca.crt peer channel join -b data.block
 
 
 
 
 
+peer channel update -o orderer.as.com:7050 -c $CHANNEL_NAME -f ./channel-artifacts/Hot1MSPanchors.tx --tls --cafile /opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/ordererOrganizations/as.com/orderers/orderer.as.com/msp/tlscacerts/tlsca.as.com-cert.pem
 
-CORE_PEER_MSPCONFIGPATH=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org2.acme.com/users/Admin@org2.acme.com/msp CORE_PEER_ADDRESS=peer0.org2.acme.com:7051 CORE_PEER_LOCALMSPID="Org2MSP" CORE_PEER_TLS_ROOTCERT_FILE=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org2.acme.com/peers/peer0.org2.acme.com/tls/ca.crt peer channel update -o orderer.acme.com:7050 -c $CHANNEL_NAME -f ./channel-artifacts/Org2MSPanchors.tx --tls --cafile /opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/ordererOrganizations/acme.com/orderers/orderer.acme.com/msp/tlscacerts/tlsca.acme.com-cert.pem
 
 
-CORE_PEER_MSPCONFIGPATH=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org3.acme.com/users/Admin@org3.acme.com/msp CORE_PEER_ADDRESS=peer0.org3.acme.com:7051 CORE_PEER_LOCALMSPID="Org3MSP" CORE_PEER_TLS_ROOTCERT_FILE=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org3.acme.com/peers/peer0.org3.acme.com/tls/ca.crt peer channel update -o orderer.acme.com:7050 -c $CHANNEL_NAME -f ./channel-artifacts/Org3MSPanchors.tx --tls --cafile /opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/ordererOrganizations/acme.com/orderers/orderer.acme.com/msp/tlscacerts/tlsca.acme.com-cert.pem
 
-export CHAINCODE_NAME=foodcontrol
-export CHAINCODE_VERSION=1
-export CC_RUNTIME_LANGUAGE=golang
-export CC_SRC_PATH="../../../chaincode/CHAINCODE_NAME/"
+
+
+CORE_PEER_MSPCONFIGPATH=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/hot2.as.com/users/Admin@hot2.as.com/msp CORE_PEER_ADDRESS=peer0.hot2.as.com:7051 CORE_PEER_LOCALMSPID="Hot2MSP" CORE_PEER_TLS_ROOTCERT_FILE=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/hot2.as.com/peers/peer0.hot2.as.com/tls/ca.crt peer channel update -o orderer.as.com:7050 -c $CHANNEL_NAME -f ./channel-artifacts/Hot2MSPanchors.tx --tls --cafile /opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/ordererOrganizations/as.com/orderers/orderer.as.com/msp/tlscacerts/tlsca.as.com-cert.pem
+
+
+CORE_PEER_MSPCONFIGPATH=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/hot3.as.com/users/Admin@hot3.as.com/msp CORE_PEER_ADDRESS=peer0.hot3.as.com:7051 CORE_PEER_LOCALMSPID="Hot3MSP" CORE_PEER_TLS_ROOTCERT_FILE=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/hot3.as.com/peers/peer0.hot3.as.com/tls/ca.crt peer channel update -o orderer.as.com:7050 -c $CHANNEL_NAME -f ./channel-artifacts/Hot3MSPanchors.tx --tls --cafile /opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/ordererOrganizations/as.com/orderers/orderer.as.com/msp/tlscacerts/tlsca.as.com-cert.pem
 
 
 ver certificado:
-cat /opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/ordererOrganizations/acme.com/orderers/orderer.acme.com/msp/tlscacerts/tlsca.acme.com-cert.pem
+cat /opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/ordererOrganizations/as.com/orderers/orderer.as.com/msp/tlscacerts/tlsca.as.com-cert.pem
 
 
-export ORDERER_CA=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/ordererOrganizations/acme.com/orderers/orderer.acme.com/msp/tlscacerts/tlsca.acme.com-cert.pem
+export ORDERER_CA=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/ordererOrganizations/as.com/orderers/orderer.as.com/msp/tlscacerts/tlsca.as.com-cert.pem
 
 
 empaquetado del chaincode
@@ -94,20 +89,20 @@ peer lifecycle chaincode package ${CHAINCODE_NAME}.tar.gz --path ${CC_SRC_PATH} 
 
 instalacion de chaincode
 
-peer lifecycle chaincode install foodcontrol.tar.gz
+peer lifecycle chaincode install data.tar.gz
 
 guardar el identificador del chaincode, para el ejemplo es:
 foodcontrol_1:b472535bc08926703c5814c5e9e59051b8b64e7822a3fbeca5b0fc0aab256af5
 
-CORE_PEER_MSPCONFIGPATH=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org2.acme.com/users/Admin@org2.acme.com/msp CORE_PEER_ADDRESS=peer0.org2.acme.com:7051 CORE_PEER_LOCALMSPID="Org2MSP" CORE_PEER_TLS_ROOTCERT_FILE=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org2.acme.com/peers/peer0.org2.acme.com/tls/ca.crt peer lifecycle chaincode install foodcontrol.tar.gz
+CORE_PEER_MSPCONFIGPATH=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerHotanizations/hot2.as.com/users/Admin@hot2.as.com/msp CORE_PEER_ADDRESS=peer0.hot2.as.com:7051 CORE_PEER_LOCALMSPID="Hot2MSP" CORE_PEER_TLS_ROOTCERT_FILE=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/hot2.as.com/peers/peer0.hot2.as.com/tls/ca.crt peer lifecycle chaincode install foodcontrol.tar.gz
 
-CORE_PEER_MSPCONFIGPATH=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org3.acme.com/users/Admin@org3.acme.com/msp CORE_PEER_ADDRESS=peer0.org3.acme.com:7051 CORE_PEER_LOCALMSPID="Org3MSP" CORE_PEER_TLS_ROOTCERT_FILE=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org3.acme.com/peers/peer0.org3.acme.com/tls/ca.crt peer lifecycle chaincode install foodcontrol.tar.gz
-
-
+CORE_PEER_MSPCONFIGPATH=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/hot3.as.com/users/Admin@hot3.as.com/msp CORE_PEER_ADDRESS=peer0.hot3.as.com:7051 CORE_PEER_LOCALMSPID="Hot3MSP" CORE_PEER_TLS_ROOTCERT_FILE=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/hot3.as.com/peers/peer0.hot3.as.com/tls/ca.crt peer lifecycle chaincode install foodcontrol.tar.gz
 
 
-peer lifecycle chaincode approveformyorg --tls --cafile $ORDERER_CA --channelID $CHANNEL_NAME --name $CHAINCODE_NAME --version $CHAINCODE_VERSION --sequence 1 --waitForEvent --signature-policy "OR ('Org1MSP.peer','Org3MSP.peer')" --package-id foodcontrol_1:b472535bc08926703c5814c5e9e59051b8b64e7822a3fbeca5b0fc0aab256af5
 
 
-peer lifecycle chaincode commit -o orderer.acme.com:7050 --tls --cafile $ORDERER_CA --peerAddresses peer0.org1.acme.com:7051 --tlsRootCertFiles /opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org1.acme.com/peers/peer0.org1.acme.com/tls/ca.crt --peerAddresses peer0.org3.acme.com:7051 --tlsRootCertFiles /opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org3.acme.com/peers/peer0.org3.acme.com/tls/ca.crt --channelID $CHANNEL_NAME --name $CHAINCODE_NAME --version $CHAINCODE_VERSION --sequence 1 --signature-policy "OR ('Org1MSP.peer','Org3MSP.peer')"
+peer lifecycle chaincode approveformyorg --tls --cafile $ORDERER_CA --channelID $CHANNEL_NAME --name $CHAINCODE_NAME --version $CHAINCODE_VERSION --sequence 1 --waitForEvent --signature-policy "OR ('Hot1MSP.peer','Hot3MSP.peer')" --package-id foodcontrol_1:b472535bc08926703c5814c5e9e59051b8b64e7822a3fbeca5b0fc0aab256af5
+
+
+peer lifecycle chaincode commit -o orderer.as.com:7050 --tls --cafile $ORDERER_CA --peerAddresses peer0.hot1.as.com:7051 --tlsRootCertFiles /opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/hot1.as.com/peers/peer0.hot1.as.com/tls/ca.crt --peerAddresses peer0.hot3.as.com:7051 --tlsRootCertFiles /opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/hot3.as.com/peers/peer0.hot3.as.com/tls/ca.crt --channelID $CHANNEL_NAME --name $CHAINCODE_NAME --version $CHAINCODE_VERSION --sequence 1 --signature-policy "OR ('Hot1MSP.peer','Hot3MSP.peer')"
 
